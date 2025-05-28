@@ -3,8 +3,25 @@
 
 // Using express: http://expressjs.com/
 var express = require('express');
+var os = require('os')
 // Create the app
 var app = express();
+
+
+// Function to get local IP address
+function getLocalIP() {
+  const interfaces = os.networkInterfaces();
+  for (const devName in interfaces) {
+    const iface = interfaces[devName];
+    for (let i = 0; i < iface.length; i++) {
+      const alias = iface[i];
+      if (alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) {
+        return alias.address;
+      }
+    }
+  }
+  return '0.0.0.0';
+}
 
 // Set up the server
 // process.env.PORT is related to deploying on heroku
@@ -12,9 +29,10 @@ var server = app.listen(process.env.PORT || 3000, listen);
 
 // This call back just tells us that the server has started
 function listen() {
-  var host = server.address().address;
+
+  var localIP = getLocalIP();
   var port = server.address().port;
-  console.log('Example app listening at http://' + host + ':' + port);
+  console.log('Example app listening at http://' + localIP + ':' + port);
 }
 
 app.use(express.static('public'));
